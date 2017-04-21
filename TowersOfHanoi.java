@@ -1,9 +1,7 @@
 package asdf;
 
 import java.util.Hashtable;
-
 import javax.swing.JOptionPane;
-
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -26,6 +24,7 @@ import javafx.stage.Stage;
 
 public class TowersOfHanoi extends Application {
 	static int ans;
+	Rectangle temporary;
 	Rectangle selectedpiece;
 	VBox selectedbox;
 	Paint temp;
@@ -34,11 +33,17 @@ public class TowersOfHanoi extends Application {
 	//Victory/defeat
 	Text t = new Text("");
 	Object[] pieces;
+	
+	VBox panel1;
+	VBox panel2;
 	VBox panel3;
 	
+	Object[] list1;
+	Object[] list2;
+	Object[] list3;
 	
 	public static void main(String[] args){
-		ans = Integer.parseInt(JOptionPane.showInputDialog("Enter number of Discs: "));
+		ans = Integer.parseInt(JOptionPane.showInputDialog("Enter Number of Discs: "));
 		System.out.println(ans);
 		launch();
 	}
@@ -51,22 +56,22 @@ public class TowersOfHanoi extends Application {
 		button.setOnMouseClicked(new autosolveHandler());
 		
 		//Adding 3 panels
-		VBox panel1 = new VBox();
+		panel1 = new VBox();
 		panel1.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
 		panel1.setAlignment(Pos.BOTTOM_CENTER);
 		panel1.setPrefHeight(980);
 		panel1.setPrefWidth(500);
 		panel1.setSpacing(1);
-		panel1.setPadding(new Insets(0, 20, 10, 20));
+		panel1.setPadding(new Insets(5, 5, 5, 5));
 		panel1.setOnMouseClicked(new panelEventHandler());
 		
-		VBox panel2 = new VBox();
+		panel2 = new VBox();
 		panel2.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
 		panel2.setAlignment(Pos.BOTTOM_CENTER);
 		panel2.setPrefHeight(500);
 		panel2.setPrefWidth(500);
 		panel2.setSpacing(1);
-		panel2.setPadding(new Insets(0, 20, 10, 20));
+		panel2.setPadding(new Insets(5, 5, 5, 5));
 		panel2.setOnMouseClicked(new panelEventHandler());
 		
 		panel3 = new VBox();
@@ -75,40 +80,23 @@ public class TowersOfHanoi extends Application {
 		panel3.setPrefHeight(500);
 		panel3.setPrefWidth(500);
 		panel3.setSpacing(1);
-		panel3.setPadding(new Insets(0, 20, 10, 20));
+		panel3.setPadding(new Insets(5, 5, 5, 5));
 		panel3.setOnMouseClicked(new panelEventHandler());
 		
-		//Adding all 4 pieces
-		Rectangle piece1 = new Rectangle(250, 50);
-		piece1.setFill(Color.RED);
-		piece1.setStroke(Color.BLACK);
-		panel1.getChildren().add(piece1);
-		piece1.setOnMouseClicked(new pieceEventHandler());
-			
-		Rectangle piece2 = new Rectangle(300, 50);
-		piece2.setFill(Color.BLUE);
-		piece2.setStroke(Color.BLACK);
-		panel1.getChildren().add(piece2);
-		piece2.setOnMouseClicked(new pieceEventHandler());
+		int size = 100;
+		pieces = new Object[ans];
 		
-		Rectangle piece3 = new Rectangle(350, 50);
-		piece3.setFill(Color.CORAL);
-		piece3.setStroke(Color.BLACK);
-		panel1.getChildren().add(piece3);
-		piece3.setOnMouseClicked(new pieceEventHandler());
-		
-		Rectangle piece4 = new Rectangle(400, 50);
-		piece4.setFill(Color.MAGENTA);
-		piece4.setStroke(Color.BLACK);
-		panel1.getChildren().add(piece4);
-		piece4.setOnMouseClicked(new pieceEventHandler());
-		
-		//Adding piece values to hashtable
-		values.put(piece1, 1);
-		values.put(piece2, 2);
-		values.put(piece3, 3);
-		values.put(piece4, 4);
-		
+		for(int i = 0; i < ans; i++){
+			temporary = new Rectangle(size, 50);
+			temporary.setFill(Color.color(Math.random(), Math.random(), Math.random()));
+			temporary.setStroke(Color.BLACK);
+			panel1.getChildren().add(temporary);
+			temporary.setOnMouseClicked(new pieceEventHandler());
+			size += 50;
+			values.put(temporary, i);
+			pieces[0] = temp;
+		}
+
 		//Adjusting elements in window
 		gp.getChildren().add(panel1);
 		gp.getColumnConstraints().add(new ColumnConstraints(500));
@@ -125,10 +113,8 @@ public class TowersOfHanoi extends Application {
 		t.setFont(Font.font("Verdana", 25));
 		GridPane.setColumnIndex(t, 5);
 		
-		pieces = new Object[]{piece1, piece2, piece3, piece4};
-		
-		
-		
+		//pieces = new Object[]{piece1, piece2, piece3, piece4};
+
 		Scene scene = new Scene(gp, 1500, 980);
 		mainStage.setScene(scene);
 		mainStage.show();
@@ -153,43 +139,48 @@ public class TowersOfHanoi extends Application {
 					VBox parentbox = (VBox) selectedpiece.getParent();
 					Object[] selectedboxlist = selectedbox.getChildren().toArray();
 					Object[] parentlist = parentbox.getChildren().toArray();
+					Object[] panel3list = panel3.getChildren().toArray();
 					
 					if(selectedpiece.equals(parentlist[0])){
 						
 						if(selectedboxlist.length > 0){
-							for(Object n : parentlist){
-								if(values.get(selectedpiece) < values.get(n)){
-									isVictory = false;
+							for(int i = 0; i < selectedboxlist.length; i++){
+								if(selectedpiece.getWidth() > ((Rectangle) selectedboxlist[i]).getWidth()){
 									t.setText("Defeat!");
-									break;
+									isVictory = false;
+									Object[] options = {"Retry", "Quit"};
+							        int startingchoice = JOptionPane.showOptionDialog(null, "Defeat! Try again?", null, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+							        
+							        if(startingchoice == JOptionPane.YES_OPTION){
+							        	System.exit(0);
+							        }
+							        else if(startingchoice == JOptionPane.NO_OPTION){
+							        	System.exit(0);
+							        }
 								}
-							}	
-							
-							if(selectedbox.equals(panel3)&& selectedboxlist.length == 4 && isVictory == true){
-								t.setText("Victory!");
-								
 							}
 						}
+						
 						
 						parentbox.getChildren().remove(selectedpiece);
 						selectedbox.getChildren().add(0, selectedpiece);
 						selectedpiece.setFill(temp);
 						
-						
 						selectedpiece = null;
 						selectedbox = null;
+						
+						if(panel1.getChildren().isEmpty() && panel2.getChildren().isEmpty()){
+							t.setText("Victory!");
+						}
 					}
 					else{
 						selectedpiece.setFill(temp);
 						selectedpiece = null;
 						selectedbox = null;
 					}
-					
-					
 				}
 			}
 		}
-		
 	}
 	
 	class pieceEventHandler implements EventHandler<MouseEvent>{
@@ -219,16 +210,14 @@ public class TowersOfHanoi extends Application {
 
 		@Override
 		public void handle(MouseEvent event) {
+	
+			solve(panel1, panel2, panel3);
 			
-			System.out.println("Memes");
-			
-			
-			
+		}
+
+		private void solve(VBox panel1, VBox panel2, VBox panel3) {
 			
 			
 		}
-		
 	}
-	
-	
 }
